@@ -7,9 +7,14 @@
 function App() {
     let data = {
         isInit: false,
+        isBattle : false,
         hiroes: [],
         hiro1: undefined,
-        hiro2: undefined
+        hiro2: undefined,
+        sounds : {
+          hiro1 : 'resources/horse-galope.mp3',
+          hiro2 : 'resources/zvuk-poezda.mp3',
+        }
     };
     /**
      * Выполняет инициализацию объека.
@@ -75,14 +80,19 @@ function App() {
      * Выполняет действие "Сражение между выбраными героями"
      **/
     function btnDoBattle() {
+        if(data.inBattle){
+          return;
+        }
         if (!(data.hiro1 && data.hiro2)) {
             alert('Нужно выбрать героев.');
             return;
         }
+        data.inBattle = true;
         animateAttack(function () {
             data.hiro1.attack(data.hiro2);
             displayHiro(data.hiro1);
             displayHiro(data.hiro2);
+            data.inBattle = false;
         });
     }
 
@@ -93,6 +103,14 @@ function App() {
             hiro1initLeft = parseInt(getComputedStyle(domHiro1).left),
             hiro2initRight = parseInt(getComputedStyle(domHiro2).right)
         ;
+        var hiro1audio = new Audio(data.sounds.hiro1),
+            hiro2audio = new Audio(data.sounds.hiro2);
+        // hiro1audio.src = data.sounds.hiro1;
+        // hiro2audio.src = data.sounds.hiro2;
+        hiro1audio.loop = true;
+        hiro2audio.loop = true;
+        hiro1audio.play();
+        hiro2audio.play();
         let interval = setInterval((function () {
             let battlefieldWidth = parseInt(getComputedStyle(domBattlefield).width);
             let hiro1Styles = getComputedStyle(domHiro1);
@@ -101,6 +119,9 @@ function App() {
             if ((battlefieldWidth / 2) - parseInt(hiro1Styles.width) < parseInt(domHiro1.style.left)) {
                 domHiro1.style.left = hiro1initLeft;
                 domHiro2.style.right = hiro2initRight;
+                // delete hiro1audio;
+                hiro1audio.pause();
+                hiro2audio.pause();
                 clearInterval(interval);
                 callback();
             }
